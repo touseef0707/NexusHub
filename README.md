@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NexusHub - YouTube Collaboration Platform
+
+NexusHub is a SaaS platform designed for YouTubers and freelance video editors to collaborate on video projects. It provides a centralized workspace for managing projects, assigning tasks, and communicating with team members.
+
+## Features
+
+- **User Authentication**: Secure authentication with Clerk, including role-based access control.
+- **Role-Based Access**: Different interfaces and permissions for YouTubers (Creators) and Video Editors.
+- **Project Management**: Create, manage, and track video projects from start to finish.
+- **Team Collaboration**: Invite editors to your organization and assign them to specific projects.
+- **Real-time Notifications**: Stay updated with real-time notifications about project updates and comments.
+- **YouTube Integration**: Connect your YouTube account to access your channel data (coming soon).
+
+## Tech Stack
+
+- **Frontend**: Next.js with TypeScript and App Router
+- **Authentication**: Clerk
+- **State Management**: React Query
+- **Styling**: Tailwind CSS
+- **Real-time Updates**: Socket.io
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 18.x or later
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/yourusername/nexushub.git
+cd nexushub
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Set up environment variables:
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=your_clerk_publishable_key
+CLERK_SECRET_KEY=your_clerk_secret_key
+
+# Clerk URLs
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/dashboard
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/dashboard
+
+# Google OAuth
+NEXT_PUBLIC_GOOGLE_CLIENT_ID=your_google_client_id
+NEXT_PUBLIC_GOOGLE_CLIENT_SECRET=your_google_client_secret
+```
+
+You'll need to create a Clerk application at [clerk.dev](https://clerk.dev) and obtain your API keys.
+
+4. Run the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Setting Up Clerk
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Create an account at [clerk.dev](https://clerk.dev)
+2. Create a new application
+3. Go to API Keys and copy your Publishable Key and Secret Key
+4. Add them to your `.env.local` file
+5. Configure your OAuth providers (Google) in the Clerk dashboard
 
-## Learn More
+## Setting Up User Roles
 
-To learn more about Next.js, take a look at the following resources:
+To set up user roles in Clerk:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Go to your Clerk Dashboard
+2. Navigate to JWT Templates
+3. Add a custom claim for the user's role
+4. Use the Clerk Admin API to update user metadata with their role (creator or editor)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Deployment
 
-## Deploy on Vercel
+The application can be deployed to Vercel:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+1. Push your code to a GitHub repository
+2. Import the repository in Vercel
+3. Add your environment variables
+4. Deploy
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
