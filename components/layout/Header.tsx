@@ -43,10 +43,7 @@ const Header = () => {
             </SignedIn>
             <SignedOut>
               <SignInButton mode="modal">
-                <Button variant="outline">Sign In</Button>
-              </SignInButton>
-              <SignInButton mode="modal">
-                <Button variant="outline">Get Started</Button>
+                <Button variant="outline">Sign In / Sign Up</Button>
               </SignInButton>
             </SignedOut>
           </div>

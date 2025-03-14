@@ -1,22 +1,14 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
 import { ClerkProviderClient } from './clerk-provider';
 import { Providers } from './providers';
-import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "NexusHub - YouTube Collaboration Platform",
-  description: "A platform for YouTubers and video editors to collaborate on video projects",
+  title: 'NexusHub | YouTube Collaboration Platform',
+  description: 'NexusHub is the all-in-one platform for YouTube creators and video editors to collaborate seamlessly.',
 };
 
 export default function RootLayout({
@@ -25,10 +17,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className}>
         <ClerkProviderClient>
           <Providers>
             {children}

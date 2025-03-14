@@ -70,8 +70,8 @@ export const Notifications = () => {
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-80 bg-card rounded-md shadow-lg overflow-hidden z-50 border border-border">
-          <div className="p-3 bg-muted flex justify-between items-center">
+        <div className="absolute right-0 mt-2 w-80 bg-card/80 backdrop-blur-sm rounded-md shadow-lg overflow-hidden z-50 border border-border">
+          <div className="p-3 bg-muted/90 backdrop-blur-sm flex justify-between items-center">
             <h3 className="text-lg font-semibold text-foreground">Notifications</h3>
             <button
               onClick={handleClearAll}
@@ -110,7 +110,7 @@ export const Notifications = () => {
               ))
             )}
           </div>
-          <div className="p-3 bg-muted text-center">
+          <div className="p-3 bg-muted/90 backdrop-blur-sm text-center">
             <Button
               variant="outline"
               size="sm"
