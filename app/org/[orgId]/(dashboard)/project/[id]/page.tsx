@@ -26,6 +26,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Textarea } from '@/components/ui/textarea';
+import { Progress } from "@/components/ui/progress";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -45,41 +46,92 @@ import {
   Share2, 
   Users 
 } from 'lucide-react';
+import { DateDisplay } from '@/components/DateDisplay';
+import { staticProjects } from '@/app/data/projects';
+import ProjectFilesTab from '@/components/ProjectFilesTab';
+import Mux from '@mux/mux-node';
+
 
 interface ProjectPageProps {
   params: {
     id: string;
+    orgId: string;
   };
 }
 
-export const generateMetadata = ({ params }: ProjectPageProps): Metadata => {
+// Add this interface near the top of the file with the other interfaces
+interface MuxUploadResult {
+  id: string;
+  status: string;
+  filename?: string;
+  [key: string]: any;
+}
+
+// Initialize Mux API client
+const muxClient = new Mux({
+  tokenId: process.env.MUX_TOKEN_ID,
+  tokenSecret: process.env.MUX_TOKEN_SECRET
+});
+
+export const generateMetadata = async ({ params }: ProjectPageProps): Promise<Metadata> => {
+  const { id } = await params;
+  const project = staticProjects.find(p => p.projectId === id);
   return {
-    title: `Project Details | NexusHub`,
-    description: 'View and manage your project details',
+    title: `${project?.title || 'Project'} | NexusHub`,
+    description: project?.description || 'View and manage your project details',
   };
 };
 
-export default function ProjectPage({ params }: ProjectPageProps) {
-  const { id } = params;
+// Add this helper function at the top level
+function getRandomAvatar(userId: string) {
+  // Use the last character of the ID to determine gender
+  const isGirl = parseInt(userId.slice(-1)) % 2 === 0;
+  const gender = isGirl ? 'girl' : 'boy';
+  return `https://avatar.iran.liara.run/public/${gender}?username=${userId}`;
+}
+
+export default async function ProjectPage({ params }: ProjectPageProps) {
+  const { id, orgId } = await params;
   
-  // Mock project data (in a real app, this would come from a database)
-  // This would be fetched based on the project ID from the URL
-  const project = {
-    id,
-    title: 'Summer Vlog Series',
-    description: 'A series of travel vlogs for the summer season, featuring destinations across Europe and Asia.',
-    status: 'in-progress',
-    createdAt: '2023-06-15T10:30:00Z',
-    deadline: '2023-07-15T23:59:59Z',
-    progress: 65,
-    teamSize: 4,
-    starred: true,
-    thumbnail: '/sample_thumbnails/vlog.jpg',
+  // Find the project from static data
+  const project = staticProjects.find(p => p.projectId === id && p.orgId === orgId);
+  
+  if (!project) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[50vh]">
+        <h1 className="text-2xl font-bold mb-4">Project Not Found</h1>
+        <Link href={`/org/${orgId}/projects`}>
+          <Button variant="outline">Back to Projects</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  // Generate Mux upload URL for this project
+  let uploadConfig = null;
+  try {
+    const upload = await muxClient.video.uploads.create({
+      new_asset_settings: {
+        playback_policy: ['public']
+      } as any,
+      cors_origin: '*'
+    });
+    
+    uploadConfig = {
+      uploadId: upload.id,
+      uploadUrl: upload.url
+    };
+  } catch (error) {
+    console.error('Error creating Mux upload URL:', error);
+    // Continue rendering the page even if upload URL generation fails
+  }
+
+  // Mock team data (in a real app, this would come from a database)
+  const teamData = {
     creator: {
       id: 'user-1',
       name: 'Alex Johnson',
       email: 'alex@example.com',
-      avatar: '/avatars/alex.png',
       initials: 'AJ',
     },
     team: [
@@ -88,7 +140,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         name: 'Sarah Chen',
         email: 'sarah@example.com',
         role: 'Editor',
-        avatar: '/avatars/sarah.png',
         initials: 'SC',
       },
       {
@@ -96,7 +147,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         name: 'Miguel Rodriguez',
         email: 'miguel@example.com',
         role: 'Videographer',
-        avatar: '/avatars/miguel.png',
         initials: 'MR',
       },
       {
@@ -104,7 +154,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         name: 'Emma Wilson',
         email: 'emma@example.com',
         role: 'Content Writer',
-        avatar: '/avatars/emma.png',
         initials: 'EW',
       },
     ],
@@ -148,7 +197,6 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         user: {
           id: 'user-1',
           name: 'Alex Johnson',
-          avatar: '/avatars/alex.png',
           initials: 'AJ',
         },
         content: "Let's focus on making the intro more engaging. The current version feels a bit slow.",
@@ -159,22 +207,59 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         user: {
           id: 'user-2',
           name: 'Sarah Chen',
-          avatar: '/avatars/sarah.png',
           initials: 'SC',
         },
         content: "I've added some transitions to speed up the intro. Check out the latest version!",
         timestamp: '2023-06-17T09:15:00Z',
       },
     ],
-  };
-
-  // Helper function to format dates
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    // Add mock videos array
+    videos: [
+      {
+        id: 'video-1',
+        uploadId: 'upload-123',
+        assetId: 'Yd01fKwp5UoOMQyzL3vrmN027Hu8T3eEzs1jcJPCpBeLo',
+        playbackId: 'qvbCpWvMeXF00VYIL4TI202kdMHi1cKh1DEIdI02IxFReg',
+        filename: 'Episode 1 - Introduction.mp4',
+        status: 'ready' as const,
+        duration: 10.00,
+        createdAt: new Date().toISOString(),
+        projectId: 1
+      },
+      {
+        id: 'video-2',
+        uploadId: 'upload-124',
+        assetId: 'in4xJ7ip56dXpG2cO8KWd62ELLZR01027uE5AYCCAQo300',
+        playbackId: '487XyfU8pggGYGv7O02dEzFJM02imHfy4bGyg4jT49V9w',
+        filename: 'Episode 2 - Getting Started.mp4',
+        status: 'ready' as const,
+        duration: 10.00,
+        createdAt: new Date().toISOString(),
+        projectId: 1
+      },
+      {
+        id: 'video-3',
+        uploadId: 'upload-125',
+        assetId: 'Rc5p2dG3QRB3HnThfHMwP3MkGaswu9gUdO9fwuqlBdo',
+        playbackId: '00uwl00YH3a6vqR01gJR9dz00ou6d011WEwsW3bdpUga01NB4',
+        filename: 'Behind the Scenes - Setup.mp4',
+        status: 'ready' as const,
+        duration: 10.00,
+        createdAt: new Date().toISOString(),
+        projectId: 1
+      },
+      {
+        id: 'video-4',
+        uploadId: 'upload-126',
+        assetId: 'n6wGa02Iaz502C9csFcThL139702VObEyCspmrUfK0100NLg',
+        playbackId: 'iA7m9jBQLTml3AInN02nt1ZQjOjMOc8T12ut73m4cQl8',
+        filename: 'Diy Ideas.mp4',
+        status: 'ready' as const,
+        duration: 10.00,
+        createdAt: new Date().toISOString(),
+        projectId: 2
+      },
+    ]
   };
 
   return (
@@ -182,7 +267,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
-          <Link href="/dashboard/projects">
+          <Link href={`/org/${orgId}/projects`}>
             <Button variant="outline" size="icon" className="h-9 w-9">
               <ArrowLeft className="h-4 w-4" />
             </Button>
@@ -190,7 +275,7 @@ export default function ProjectPage({ params }: ProjectPageProps) {
           <div>
             <h1 className="text-3xl font-bold tracking-tight">{project.title}</h1>
             <p className="text-muted-foreground mt-1">
-              Project ID: {project.id}
+              Project ID: {project.projectId}
             </p>
           </div>
         </div>
@@ -233,15 +318,19 @@ export default function ProjectPage({ params }: ProjectPageProps) {
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Created by</p>
-                <p className="text-sm font-medium">{project.creator.name}</p>
+                <p className="text-sm font-medium">{teamData.creator.name}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Created on</p>
-                <p className="text-sm font-medium">{formatDate(project.createdAt)}</p>
+                <p className="text-sm font-medium">
+                  <DateDisplay date={project.createdAt || ''} />
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-sm text-muted-foreground">Deadline</p>
-                <p className="text-sm font-medium">{formatDate(project.deadline)}</p>
+                <p className="text-sm font-medium">
+                  <DateDisplay date={project.deadline} />
+                </p>
               </div>
             </div>
             
@@ -253,46 +342,52 @@ export default function ProjectPage({ params }: ProjectPageProps) {
             <div className="space-y-3">
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Progress</span>
-                <span className="font-medium">{project.progress}%</span>
+                <span className="font-medium">{project.progress || 0}%</span>
               </div>
-              <div className="h-2 bg-muted rounded-full overflow-hidden">
-                <div 
-                  className={`h-full ${
-                    project.status === 'completed' 
-                      ? 'bg-green-500' 
-                      : 'bg-primary'
-                  }`}
-                  style={{ width: `${project.progress}%` }}
-                />
-              </div>
+              <Progress 
+                value={project.progress || 0} 
+                className={`h-2 ${
+                  project.status === 'completed' 
+                    ? '[&>div]:bg-green-500' 
+                    : project.status === 'in-progress' 
+                      ? '[&>div]:bg-blue-500' 
+                      : '[&>div]:bg-orange-500'
+                }`}
+              />
             </div>
           </CardContent>
         </Card>
 
+        {/* Team Members Card */}
         <Card>
           <CardHeader>
-            <CardTitle>Team</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="h-5 w-5" />
+              Team Members
+            </CardTitle>
             <CardDescription>
-              People working on this project.
+              {project.teamSize} members working on this project
             </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
+              {/* Project Creator */}
               <div className="flex items-center gap-3">
                 <Avatar>
-                  <AvatarImage src={project.creator.avatar} alt={project.creator.name} />
-                  <AvatarFallback>{project.creator.initials}</AvatarFallback>
+                  <AvatarImage src={getRandomAvatar(teamData.creator.id)} alt={teamData.creator.name} />
+                  <AvatarFallback>{teamData.creator.initials}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="text-sm font-medium">{project.creator.name}</p>
+                  <p className="text-sm font-medium">{teamData.creator.name}</p>
                   <p className="text-xs text-muted-foreground">Project Creator</p>
                 </div>
               </div>
-              
-              {project.team.map((member) => (
+
+              {/* Team Members */}
+              {teamData.team.map((member) => (
                 <div key={member.id} className="flex items-center gap-3">
                   <Avatar>
-                    <AvatarImage src={member.avatar} alt={member.name} />
+                    <AvatarImage src={getRandomAvatar(member.id)} alt={member.name} />
                     <AvatarFallback>{member.initials}</AvatarFallback>
                   </Avatar>
                   <div>
@@ -301,14 +396,14 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                   </div>
                 </div>
               ))}
+
+              {/* Add Member Button */}
+              <Button variant="outline" className="w-full mt-4">
+                <PlusCircle className="h-4 w-4 mr-2" />
+                Add Team Member
+              </Button>
             </div>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" size="sm" className="w-full flex items-center gap-2">
-              <PlusCircle className="h-4 w-4" />
-              <span>Invite Team Member</span>
-            </Button>
-          </CardFooter>
         </Card>
       </div>
 
@@ -346,12 +441,24 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {project.tasks.map((task) => (
+                  {teamData.tasks.map((task) => (
                     <TableRow key={task.id}>
                       <TableCell>
                         <div>
                           <p className="font-medium">{task.title}</p>
                           <p className="text-sm text-muted-foreground">{task.description}</p>
+                          <div className="mt-2">
+                            <Progress 
+                              value={task.status === 'completed' ? 100 : task.status === 'in-progress' ? 50 : 0} 
+                              className={`h-1.5 ${
+                                task.status === 'completed' 
+                                  ? '[&>div]:bg-green-500' 
+                                  : task.status === 'in-progress' 
+                                    ? '[&>div]:bg-blue-500' 
+                                    : '[&>div]:bg-orange-500'
+                              }`}
+                            />
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -368,11 +475,13 @@ export default function ProjectPage({ params }: ProjectPageProps) {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        {task.assignedTo === project.creator.id 
-                          ? project.creator.name 
-                          : project.team.find(m => m.id === task.assignedTo)?.name}
+                        {task.assignedTo === teamData.creator.id 
+                          ? teamData.creator.name 
+                          : teamData.team.find(m => m.id === task.assignedTo)?.name}
                       </TableCell>
-                      <TableCell>{formatDate(task.dueDate)}</TableCell>
+                      <TableCell>
+                        <DateDisplay date={task.dueDate} />
+                      </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -409,17 +518,17 @@ export default function ProjectPage({ params }: ProjectPageProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
-                {project.comments.map((comment) => (
+                {teamData.comments.map((comment) => (
                   <div key={comment.id} className="flex gap-4">
                     <Avatar>
-                      <AvatarImage src={comment.user.avatar} alt={comment.user.name} />
+                      <AvatarImage src={getRandomAvatar(comment.user.id)} alt={comment.user.name} />
                       <AvatarFallback>{comment.user.initials}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{comment.user.name}</span>
                         <span className="text-xs text-muted-foreground">
-                          {formatDate(comment.timestamp)} at {new Date(comment.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          <DateDisplay date={comment.timestamp} showTime />
                         </span>
                       </div>
                       <p className="text-sm">{comment.content}</p>
@@ -446,25 +555,11 @@ export default function ProjectPage({ params }: ProjectPageProps) {
         </TabsContent>
         
         <TabsContent value="files" className="mt-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <div>
-                <CardTitle>Project Files</CardTitle>
-                <CardDescription>
-                  Manage files and assets for this project.
-                </CardDescription>
-              </div>
-              <Button size="sm" className="flex items-center gap-2">
-                <PlusCircle className="h-4 w-4" />
-                <span>Upload File</span>
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-center h-40 border-2 border-dashed rounded-md">
-                <p className="text-muted-foreground">No files uploaded yet</p>
-              </div>
-            </CardContent>
-          </Card>
+          <ProjectFilesTab 
+            projectId={id} 
+            initialVideos={teamData.videos as any}
+            uploadConfig={uploadConfig}
+          />
         </TabsContent>
       </Tabs>
     </div>

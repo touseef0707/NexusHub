@@ -3,7 +3,8 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 // Define routes that should be public
 const publicRoutes = [
   "/",
-  "/api/webhook",
+  "/api/webhooks/mux",
+  "/api/webhooks/clerk",
   "/about",
   "/contact",
   "/pricing",
@@ -17,18 +18,23 @@ const publicRoutes = [
   "/api"
 ];
 
-// Create a matcher for protected routes (all routes not in publicRoutes)
-const isProtectedRoute = createRouteMatcher([
-  "/((?!_next|api|webhook|about|contact|pricing|privacy|terms|cookies|gdpr|blog|help|tutorials|\\.).*)/"
-]);
+// Create a matcher for public routes
+const isPublicRoute = createRouteMatcher(publicRoutes);
 
 export default clerkMiddleware((auth, req) => {
-  // Protect routes that aren't in the public routes list
-  if (isProtectedRoute(req)) {
-    auth().protect();
+  // Skip authentication for public routes
+  if (isPublicRoute(req)) {
+    return;
   }
+  // Protect all other routes
+  auth().protect();
 });
 
 export const config = {
-  matcher: ['/((?!.+\\.[\\w]+$|_next).*)', '/', '/(api|trpc)(.*)'],
+  matcher: [
+    // Skip all static files
+    "/((?!_next|.*\\..*).*)",
+    // Run on all API routes
+    "/api/(.*)",
+  ],
 }; 

@@ -147,3 +147,45 @@
     @apply cursor-pointer;
   }
 }
+
+/* Clerk Custom Styling */
+.cl-internal-1iq83ym {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(4px) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.cl-internal-1iq83ym:hover {
+  background-color: rgba(255, 255, 255, 0.8) !important;
+  color: black !important;
+}
+
+/* Organization Switcher Buttons */
+.cl-organizationSwitcherTrigger {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(4px) !important;
+  color: var(--foreground) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.cl-organizationPreview, .cl-organizationSwitcherTrigger span {
+  color: var(--foreground) !important;
+}
+
+.cl-organizationSwitcherPopoverCard {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+}
+
+.cl-popoverCard {
+  background-color: var(--background) !important;
+  border: 1px solid var(--border) !important;
+}
+
+/* Organization Dropdown Item Hover */
+.cl-organizationSwitcherPopoverAction:hover {
+  background-color: var(--secondary) !important;
+  color: black !important;
+}

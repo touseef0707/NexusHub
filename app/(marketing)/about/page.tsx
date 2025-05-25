@@ -148,33 +148,96 @@ export default function AboutPage() {
         </div>
       </div>
 
+      {/* Organizations Section */}
+      <div className="mb-20">
+        <h2 className="text-3xl font-bold mb-8 text-center">Organizations for YouTube Channels</h2>
+        <p className="text-lg text-muted-foreground text-center mb-10 max-w-3xl mx-auto">
+          Manage multiple YouTube channels efficiently with our organization feature. Create dedicated workspaces for each channel and collaborate seamlessly with your team.
+        </p>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+          <div className="p-6 bg-card rounded-lg shadow-md border border-border">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold mb-2">Channel Management</h3>
+            <p className="text-muted-foreground mb-4">
+              Create separate organizations for each of your YouTube channels to keep projects, team members, and resources organized.
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 pl-4">
+              <li>Dedicated workspace for each channel</li>
+              <li>Channel-specific projects and tasks</li>
+              <li>Customized workflows per channel</li>
+            </ul>
+          </div>
+          
+          <div className="p-6 bg-card rounded-lg shadow-md border border-border">
+            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
+            </div>
+            <h3 className="text-xl font-bold mb-2">Team Collaboration</h3>
+            <p className="text-muted-foreground mb-4">
+              Invite team members to specific channel organizations and assign appropriate roles and permissions.
+            </p>
+            <ul className="list-disc list-inside text-muted-foreground space-y-2 pl-4">
+              <li>Role-based access control</li>
+              <li>Channel-specific team management</li>
+              <li>Seamless collaboration between creators and editors</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="bg-card p-6 rounded-lg shadow-md border border-border">
+          <h3 className="text-xl font-bold mb-4 text-center">How to Get Started with Organizations</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="flex flex-col items-center text-center">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mb-3">1</div>
+              <h4 className="font-semibold mb-2">Create an Organization</h4>
+              <p className="text-muted-foreground text-sm">Create a new organization for your YouTube channel through the dashboard dropdown menu.</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mb-3">2</div>
+              <h4 className="font-semibold mb-2">Invite Team Members</h4>
+              <p className="text-muted-foreground text-sm">Add editors, designers, and other team members to your organization with appropriate roles.</p>
+            </div>
+            <div className="flex flex-col items-center text-center">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold mb-3">3</div>
+              <h4 className="font-semibold mb-2">Create Projects</h4>
+              <p className="text-muted-foreground text-sm">Start creating projects specific to your YouTube channel and collaborate with your team.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* CTA Section */}
-        <div className="text-center bg-card p-10 rounded-xl shadow-lg border border-border">
-          <h2 className="text-3xl font-bold mb-6">Ready to transform your creative workflow?</h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-            Join thousands of creators and editors who are already using NexusHub to collaborate more effectively.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-      <SignedOut>
+      <div className="text-center bg-card p-10 rounded-xl shadow-lg border border-border">
+        <h2 className="text-3xl font-bold mb-6">Ready to transform your creative workflow?</h2>
+        <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          Join thousands of creators and editors who are already using NexusHub to collaborate more effectively.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <SignedOut>
             <Button asChild size="lg">
               <SignUpButton mode="modal">
                 Get Started
               </SignUpButton>
             </Button>
-      </SignedOut>
-      <SignedIn>
-      <Button asChild size="lg">
-              <Link href="/dashboard">Get Started</Link>
+          </SignedOut>
+          <SignedIn>
+            <Button asChild size="lg">
+              <Link href="/organizations">Go to Organizations</Link>
             </Button>
-      </SignedIn>
+          </SignedIn>
 
-            <Button asChild variant="outline" size="lg">
-              <Link href="/contact">Contact Us</Link>
-            </Button>
-          </div>
+          <Button asChild variant="outline" size="lg">
+            <Link href="/contact">Contact Us</Link>
+          </Button>
         </div>
-
-        
+      </div>
     </div>
   );
 } 

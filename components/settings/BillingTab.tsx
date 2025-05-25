@@ -188,7 +188,7 @@ export function BillingTab() {
                 <div className="flex items-center gap-4">
                   <span className="text-sm font-medium">{invoice.amount}</span>
                   <Badge
-                    variant={invoice.status === 'paid' ? 'success' : 'outline'}
+                    variant={invoice.status === 'paid' ? 'outline' : 'default'}
                     className={
                       invoice.status === 'paid'
                         ? 'bg-green-100 text-green-800 hover:bg-green-100'

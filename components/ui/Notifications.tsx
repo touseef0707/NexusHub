@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { Bell, X } from 'lucide-react';
-import { useSocket } from '@/lib/hooks/useSocket';
 import { Button } from '@/components/ui/button';
 
 // Sample notification data for demo purposes
@@ -32,22 +31,20 @@ const DEMO_NOTIFICATIONS = [
 
 export const Notifications = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { notifications, clearNotification, clearAllNotifications } = useSocket();
+  const [notifications, setNotifications] = useState(DEMO_NOTIFICATIONS);
   
-  // For demo purposes, we'll use the sample notifications
-  const allNotifications = [...DEMO_NOTIFICATIONS, ...notifications];
-  const unreadCount = allNotifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter(n => !n.read).length;
 
   const toggleNotifications = () => {
     setIsOpen(!isOpen);
   };
 
   const handleClearNotification = (id: string) => {
-    clearNotification(id);
+    setNotifications(notifications.filter(n => n.id !== id));
   };
 
   const handleClearAll = () => {
-    clearAllNotifications();
+    setNotifications([]);
   };
 
   const formatTimestamp = (timestamp: string) => {
@@ -81,12 +78,12 @@ export const Notifications = () => {
             </button>
           </div>
           <div className="max-h-96 overflow-y-auto">
-            {allNotifications.length === 0 ? (
+            {notifications.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
                 No notifications
               </div>
             ) : (
-              allNotifications.map((notification) => (
+              notifications.map((notification) => (
                 <div
                   key={notification.id}
                   className={`p-4 border-b border-border flex items-start ${

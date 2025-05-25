@@ -1,4 +1,6 @@
-import { UserButton } from '@clerk/nextjs';
+'use client';
+
+import { UserButton, OrganizationSwitcher, useOrganization } from '@clerk/nextjs';
 import Link from 'next/link';
 import { ReactNode } from 'react';
 import { Notifications } from '@/components/ui/Notifications';
@@ -11,8 +13,50 @@ import {
   Settings, 
   Menu 
 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const { organization } = useOrganization();
+  
+  // Extract organization ID from the path if available
+  const getOrgIdFromPath = () => {
+    const segments = pathname.split('/').filter(segment => segment);
+    if (segments.length >= 2 && segments[0] === 'org') {
+      return segments[1];
+    }
+    return null;
+  };
+  
+  // Get the organization ID either from the Clerk hook or from the URL path
+  const orgId = organization?.id || getOrgIdFromPath();
+  
+  // Create organization-specific links
+  const orgPrefix = orgId ? `/org/${orgId}` : '';
+  
+  // Extract the current path suffix after the orgId
+  const getCurrentPathSuffix = () => {
+    // Split the path by '/' and remove empty segments
+    const segments = pathname.split('/').filter(segment => segment);
+    
+    // The first segment should be 'org', the second should be the orgId
+    if (segments.length >= 2 && segments[0] === 'org') {
+      // Return everything after the orgId, or 'dashboard' if nothing follows
+      return segments.slice(2).join('/') || 'dashboard';
+    }
+    
+    return 'dashboard';
+  };
+  
+  // Create the redirect URL template for organization switching
+  const afterSelectUrl = `/org/:id/${getCurrentPathSuffix()}`;
+  
+  // Helper to determine if a link is active
+  const isActiveLink = (path: string) => {
+    if (!path) return false;
+    return pathname.includes(path);
+  };
+
   return (
     <div className="flex h-screen bg-background">
       {/* Sidebar */}
@@ -27,46 +71,50 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <nav className="flex-1 px-2 pb-4 space-y-1">
               <Link
                 href="/"
-                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-foreground bg-accent transition-colors hover:bg-accent/80"
+                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-foreground hover:bg-accent/80 transition-colors"
               >
                 <Home className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 Home
               </Link>
 
               <Link
-                href="/dashboard"
-                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-foreground bg-accent transition-colors hover:bg-accent/80"
+                href={`${orgPrefix}/`}
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActiveLink('/dashboard') 
+                    ? 'bg-accent text-foreground' 
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                } transition-colors`}
               >
                 <LayoutDashboard className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 Dashboard
               </Link>
 
               <Link
-                href="/dashboard/projects"
-                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                href={`${orgPrefix}/projects`}
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActiveLink('/projects') 
+                    ? 'bg-accent text-foreground' 
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                } transition-colors`}
               >
                 <FolderKanban className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 Projects
               </Link>
 
               <Link
-                href="/dashboard/team"
-                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-              >
-                <Users className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-                Team
-              </Link>
-
-              <Link
-                href="/dashboard/settings"
-                className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                href={`${orgPrefix}/settings`}
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  isActiveLink('/settings') 
+                    ? 'bg-accent text-foreground' 
+                    : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                } transition-colors`}
               >
                 <Settings className="mr-3 h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
                 Settings
               </Link>
             </nav>
           </div>
-          <div className="flex-shrink-0 flex border-t border-border p-4">
+          <div className="flex-shrink-0 flex flex-col border-t border-border p-4 space-y-3">
             <div className="flex items-center">
               <div>
                 <UserButton />
@@ -104,6 +152,24 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </div>
               </div>
               <div className="flex items-center space-x-4">
+                <div>
+                  <OrganizationSwitcher 
+                    hidePersonal
+                    afterSelectOrganizationUrl={afterSelectUrl}
+                    appearance={{
+                      elements: {
+                        organizationSwitcherTrigger: "border border-border bg-background/80 backdrop-blur-sm rounded-md p-2",
+                        organizationPreview: "text-foreground",
+                        organizationSwitcherPopoverCard: "bg-background border-border",
+                        organizationSwitcherPopoverAction: "text-foreground hover:bg-secondary",
+                        organizationSwitcherPopoverActionButton: "text-muted-foreground hover:text-foreground",
+                        organizationSwitcherPopoverActionButtonIcon: "text-muted-foreground",
+                        organizationSwitcherPopoverActionButtonText: "text-foreground",
+                        organizationSwitcherPopoverFooter: "border-t border-border"
+                      }
+                    }}
+                  />
+                </div>
                 <ThemeToggle />
                 <Notifications />
                 <div className="ml-3 md:hidden">
